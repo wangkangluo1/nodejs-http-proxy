@@ -1,5 +1,5 @@
 /*** config start ***/
-var PROXY_PORT = '8888';            //对外端口
+var PROXY_PORT = '8081';            //对外端口
 /*** config end ***/
 
 var http = require('http');
@@ -12,9 +12,9 @@ function request(cReq, cRes) {
   var u = url.parse(cReq.url);
 
   var options = {
-    hostname : u.hostname, 
+    hostname : u.hostname,
     port     : u.port || 80,
-    path     : u.path,       
+    path     : u.path,
     method   : cReq.method,
     headers  : cReq.headers
   };
@@ -42,12 +42,16 @@ function connect(cReq, cSock) {
   cSock.pipe(pSock);
 }
 
-var options = {
-  key  : fs.readFileSync('./private.pem'),
-  cert : fs.readFileSync('./public.crt')
-};
+// var options = {
+//   key  : fs.readFileSync('./private.pem'),
+//   cert : fs.readFileSync('./public.crt')
+// };
 
-https.createServer(options)
+https.createServer({
+    // key: fs.readFileSync('ryans-ley.pem'),
+    // cert: fs.readFileSync('ryans-cert.pem'),
+    NPNProtocols: ['http/2.0', 'spdy', 'http/1.1', 'http/1.0']
+  })
   .on('request', request)
   .on('connect', connect)
   .listen(PROXY_PORT, '0.0.0.0');
