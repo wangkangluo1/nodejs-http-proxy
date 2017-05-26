@@ -4,6 +4,8 @@
 var http = require('http');
 var net = require('net');
 var url = require('url');
+// var JSON = require('json-serialize');
+var serialize = require('node-serialize');
 
 function request(cReq, cRes) {
     var u = url.parse(cReq.url);
@@ -18,6 +20,18 @@ function request(cReq, cRes) {
 
     var pReq = http.request(options, function(pRes) {
         cRes.writeHead(pRes.statusCode, pRes.headers);
+        pRes.on('data', function (chunk) {
+            console.log('BODY: ' + chunk);
+        });
+        pRes.setEncoding('utf8');
+        pRes.on('end', () => {
+            try {
+                const parsedData = JSON.parse(rawData);
+                console.log(parsedData);
+            } catch (e) {
+                console.error(e.message);
+            }
+        });
         pRes.pipe(cRes);
     }).on('error', function(e) {
         cRes.end();
